@@ -44,6 +44,9 @@ class ContentNode: ASDisplayNode {
             FlagNode(descr: "cyan", color: UIColor.cyan, height: 100),
         ]
         super.init()
+        automaticallyManagesSubnodes = true
+        backgroundColor = UIColor.white
+        style.width = ASDimensionMake(ASDimensionUnit.fraction, 1.0)
     }
 
     override func layoutSpecThatFits(_ constrainedSize: ASSizeRange) -> ASLayoutSpec {
@@ -77,8 +80,6 @@ class ViewController: ASViewController<ASScrollNode> {
 
     required init?(coder aDecoder: NSCoder) {
         let contentNode = ContentNode()
-        contentNode.automaticallyManagesSubnodes = true
-        contentNode.backgroundColor = UIColor.white
         self.contentNode = contentNode
 
         let scrollNode = ASScrollNode()
