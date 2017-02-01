@@ -10,59 +10,46 @@ import UIKit
 import AsyncDisplayKit
 
 class FlagNode: ASDisplayNode {
-    var desc: String = ""
-    var height: CGFloat = 44
+    let descr: String
+    let height: CGFloat
+
+    init(descr: String, color: UIColor, height: CGFloat) {
+        self.descr = descr
+        self.height = height
+        super.init()
+        backgroundColor = color
+        style.width = ASDimensionMake(ASDimensionUnit.fraction, 1.0)
+    }
 
     override func calculateSizeThatFits(_ constrainedSize: CGSize) -> CGSize {
         return CGSize(width: constrainedSize.width, height: height)
     }
 
     override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
-        print("tapped " + desc)
+        print("tapped " + descr)
     }
 }
 
 class ContentNode: ASDisplayNode {
-    private(set) var calculatedContentSize: CGSize = .zero
+    let verticalNodes: [ASLayoutElement]
+
+    override init() {
+        verticalNodes = [
+            FlagNode(descr: "red", color: UIColor.red, height: 80),
+            FlagNode(descr: "yellow", color: UIColor.yellow, height: 40),
+            FlagNode(descr: "blue", color: UIColor.blue, height: 120),
+            FlagNode(descr: "green", color: UIColor.green, height: 300),
+            FlagNode(descr: "orange", color: UIColor.orange, height: 10),
+            FlagNode(descr: "black", color: UIColor.black, height: 160),
+            FlagNode(descr: "cyan", color: UIColor.cyan, height: 100),
+        ]
+        super.init()
+    }
 
     override func layoutSpecThatFits(_ constrainedSize: ASSizeRange) -> ASLayoutSpec {
-        let nodeSpecs: [(String, UIColor, CGFloat)] = [
-            ("red", UIColor.red, 80),
-            ("yellow", UIColor.yellow, 40),
-            ("blue", UIColor.blue, 120),
-            ("green", UIColor.green, 300),
-            ("orange", UIColor.orange, 10),
-            ("black", UIColor.black, 160),
-            ("cyan", UIColor.cyan, 100),
-        ]
-        let verticalNodes:[ASLayoutElement] = nodeSpecs.map { (spec: (String, UIColor, CGFloat)) -> ASLayoutElement in
-            let node = FlagNode()
-            node.desc = spec.0
-            node.backgroundColor = spec.1
-            node.height = spec.2
-            node.style.width = ASDimensionMake(ASDimensionUnit.fraction, 1.0)
-            return node
-        }
         let verticalStack = ASStackLayoutSpec.vertical()
         verticalStack.children = verticalNodes
         return verticalStack
-    }
-
-    private func calculateContentSize() -> CGSize {
-        let verticalLayouts = calculatedLayout?.sublayouts
-        let addLayoutHeight = { (sum: CGFloat, layout: ASLayout) -> CGFloat in
-            return sum + layout.size.height
-        }
-        if let summedLayoutHeight = verticalLayouts?.reduce(0, addLayoutHeight) {
-            return CGSize(width: calculatedSize.width, height: summedLayoutHeight)
-        }
-        return calculatedSize
-    }
-
-    override func layout() {
-        super.layout()
-        calculatedContentSize = calculateContentSize()
-        print("calculatedContentSize: \(calculatedContentSize) frame: \(view.frame)")
     }
 
     func calculatePreferredLayoutSize(constrainedSize: ASSizeRange) -> CGSize {
@@ -85,7 +72,7 @@ class ContentNode: ASDisplayNode {
 }
 
 class ViewController: ASViewController<ASScrollNode> {
-    let autoContentSize = false
+    let autoContentSize = true
     let contentNode: ContentNode
 
     required init?(coder aDecoder: NSCoder) {
@@ -111,7 +98,7 @@ class ViewController: ASViewController<ASScrollNode> {
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
         if !autoContentSize {
-            let newContentSize = contentNode.calculatedContentSize
+            let newContentSize = contentNode.style.preferredSize
             if newContentSize != .zero && newContentSize != node.view.contentSize {
                 node.view.contentSize = newContentSize
             }
