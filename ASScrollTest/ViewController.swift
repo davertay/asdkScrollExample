@@ -155,8 +155,10 @@ class ViewController: ASViewController<ASScrollNode> {
     override func nodeConstrainedSize() -> ASSizeRange {
         if autoContentSize {
             let width: CGFloat = isViewLoaded ? view.bounds.width : 320
-            let size = CGSize(width: width, height: 100000) // crashes if you use CGFloat.greatestFiniteMagnitude!!
-            return ASSizeRangeMake(size)
+            let height: CGFloat = isViewLoaded ? view.bounds.height : 480
+            let minSize = CGSize(width: width, height: height) // Will crash if you use CGFloat.max here :-(
+            let maxSize = CGSize(width: width, height: CGFloat.greatestFiniteMagnitude)
+            return ASSizeRange(min: minSize, max: maxSize)
         } else {
             return super.nodeConstrainedSize()
         }
